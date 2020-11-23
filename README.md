@@ -12,7 +12,8 @@ Then you can run the app by hitting:
 ./kube-client
 ```
 
-`Welcome to the world of kube-client - A CLI based client app to call Kubernetes APIs !!
+```
+Welcome to the world of kube-client - A CLI based client app to call Kubernetes APIs !!
 NAME:
    kube-client - Using client-go effectively with Kubernetes api
 
@@ -32,4 +33,4 @@ COMMANDS:
 GLOBAL OPTIONS:
    --help, -h     show help
    --version, -v  print the version
-`
+```
