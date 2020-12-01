@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package deploy;
+package kubepb;
 
 option go_package = ".;kubepb";
 
@@ -12,13 +12,14 @@ message DeployManifest {
 }
 
 message DeployRequest {
-
-}
-
-message DeployResponse {
     DeployManifest deployManifest = 1;
 }
 
+message DeployResponse {
+    string result = 1;
+}
+
 service DeployService {
-    rpc Deploy (DeployRequest) returns (stream DeployResponse);
+    // Server Streaming
+    rpc Deploy(DeployRequest) returns (stream DeployResponse) {};
 }

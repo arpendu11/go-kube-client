@@ -1,4 +1,4 @@
-module github.com/arpendu11/kube-client
+module github.com/arpendu11/go-kube-client
 
 go 1.15
 
