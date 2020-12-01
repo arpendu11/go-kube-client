@@ -1,7 +1,7 @@
 # go-kube-client
 A Go CLI based client which can manage, install and queue workflows in Kubernetes
 
-You can build the app by running:
+You can build the app by running in required folder:
 ```
 go build
 ```
@@ -9,16 +9,17 @@ go build
 Then you can run the app by hitting:
 
 ```
-./kube-client
+cd cli-app
+./cli-app
 ```
 
 ```
 Welcome to the world of kube-client - A CLI based client app to call Kubernetes APIs !!
 NAME:
-   kube-client - Using client-go effectively with Kubernetes api
+   cli-app - Using client-go effectively with Kubernetes api
 
 USAGE:
-   kube-client [global options] command [command options] [arguments...]
+   cli-app [global options] command [command options] [arguments...]
 
 VERSION:
    1.0
