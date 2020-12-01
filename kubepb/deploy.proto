@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package deploy;
+
+option go_package = ".;kubepb";
+
+message DeployManifest {
+    string customer_name = 1;
+    string customer_type = 2;
+    string deployment_type = 3;
+    repeated string products = 4;
+}
+
+message DeployRequest {
+
+}
+
+message DeployResponse {
+    DeployManifest deployManifest = 1;
+}
+
+service DeployService {
+    rpc Deploy (DeployRequest) returns (stream DeployResponse);
+}
