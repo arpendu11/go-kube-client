@@ -1,22 +1,26 @@
 package main
 
 import (
-	// "bytes"
-	"fmt"
 	"log"
 	"os/exec"
-	// "strings"
 	"github.com/urfave/cli"
 )
 
 func deploy(c *cli.Context) {
-	cmd, err := exec.Command("helm install prometheus prometheus-community/kube-prometheus-stack -n arcsight-installer-9qe5i").Output()
-	// cmd.Stdin = strings.NewReader("some input")
-	// var out bytes.Buffer
-	// cmd.Stdout = &out
-	// err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%s\n",cmd)
+	grep := exec.Command("grep", "grafana")
+    ps := exec.Command("kubectl", "get", "pods", "--all-namespaces")
+
+    // Get ps's stdout and attach it to grep's stdin.
+    pipe, _ := ps.StdoutPipe()
+    defer pipe.Close()
+
+    grep.Stdin = pipe
+
+    // Run ps first.
+    ps.Start()
+
+    // Run and get the output of grep.
+    res, _ := grep.Output()
+
+    log.Printf("%s\n", string(res))
 }

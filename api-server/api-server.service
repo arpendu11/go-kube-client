@@ -1,0 +1,28 @@
+[Unit]
+Description=Go Deploy service
+# ConditionPathExists=/home/ubuntu/work/src/sleepservice/sleepservice
+After=network.target
+ 
+[Service]
+Type=simple
+User=root
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+startLimitIntervalSec=60
+
+WorkingDirectory=/opt/arpendu/go-kube-client/api-server
+ExecStart=/opt/arpendu/go-kube-client/api-server/api-server 
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/api-server
+ExecStartPre=/bin/chown root:root /var/log/api-server
+ExecStartPre=/bin/chmod 755 /var/log/api-server
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=api-server
+ 
+[Install]
+WantedBy=multi-user.target

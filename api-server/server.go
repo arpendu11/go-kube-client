@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Welcome to the world of kube-client - A Server Sent Events based server to deploy products/apps in Kubernetes !!")
+	fmt.Println("Welcome to the world of kube-client - A Rest API server to deploy products/apps in Kubernetes !!")
 	//if we crash the go code, we get the file name and line number
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 

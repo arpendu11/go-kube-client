@@ -26,7 +26,7 @@ var nextDeployID uint64
 var lock sync.Mutex
 
 func (u *DeployResponse) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	switch r.Method {
 	case http.MethodGet:

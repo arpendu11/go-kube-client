@@ -19,6 +19,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43 // indirect
 	google.golang.org/grpc v1.31.0
 	google.golang.org/protobuf v1.25.0
+	gopkg.in/pipe.v2 v2.0.0-20140414041502-3c2ca4d52544
 	k8s.io/api v0.17.9
 	k8s.io/apimachinery v0.17.9
 	k8s.io/client-go v0.17.9

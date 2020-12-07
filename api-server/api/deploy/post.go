@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"os/exec"
 )
 
 func doPost(w http.ResponseWriter, r *http.Request) {
@@ -22,18 +23,31 @@ func doPost(w http.ResponseWriter, r *http.Request) {
 
 	// start of protected code changes
 	lock.Lock()
-	aDeploy.Status = "Running"	
+	var deployed = false	
 	if len(db) < 1 {
-		nextDeployID++
-		aDeploy.ID = nextDeployID
-		db = append(db, aDeploy)
+		deployed = installProducts(aDeploy.Products)
+		if deployed {
+			aDeploy.Status = "Running"
+			nextDeployID++
+			aDeploy.ID = nextDeployID
+			db = append(db, aDeploy)
+		} else {
+			aDeploy.Status = "Failed"
+			log.Fatal("Failed to install the products. Please try again later!")
+		}		
 	} else {
 		var match = false
 		for _, d := range db {
 			if aDeploy.CustomerName == d.CustomerName {
 				for _, p := range aDeploy.Products {
 					if !itemExists(d.Products, p) {
-						d.Products = append([]string{p}, d.Products...)
+						deployed = installProducts([]string{p})
+						if deployed {
+							d.Products = append([]string{p}, d.Products...)
+						} else {
+							aDeploy.Status = "Failed"
+							log.Fatal("Failed to install the products. Please try again later!")
+						}
 					}
 				}
 				match = true
@@ -41,9 +55,16 @@ func doPost(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if !match {
-			nextDeployID++
-			aDeploy.ID = nextDeployID
-			db = append(db, aDeploy)
+			deployed = installProducts(aDeploy.Products)
+			if deployed {
+				aDeploy.Status = "Running"
+				nextDeployID++
+				aDeploy.ID = nextDeployID
+				db = append(db, aDeploy)
+			} else {
+				aDeploy.Status = "Failed"
+				log.Fatal("Failed to install the products. Please try again later!")
+			}
 		}
 	}
 	// end protected code changes
@@ -68,4 +89,64 @@ func itemExists(slice interface{}, item interface{}) bool {
 	}
 
 	return false
+}
+
+func installProducts(products []string) bool {
+	var cmdList []string
+	var grepList []string
+	for _, p := range products {
+		if p == "fusion" {
+			cmdList = []string{"helm", "install", "fusion", "fusion-helm-chart/.", "-n", "arcsight-installer-9qe5i"}
+		} else if p == "recon" {
+			cmdList = []string{"helm", "install", "recon", "recon-helm-chart/.", "-n", "arcsight-installer-9qe5i"}
+		} else if p == "prometheus" {
+			cmdList = []string{"kubectl", "get", "pods", "--all-namespaces"}
+			grepList = []string{"grep", "prometheus"}
+		} else if p == "monitoring_dashboard" {
+			cmdList = []string{"kubectl", "get", "pods", "--all-namespaces"}
+			grepList = []string{"grep", "grafana"}
+		} else {
+			log.Fatalf("Failed to execute commands: Product %s not recognized!\n", p)
+			return false
+		}
+	}
+
+	if len(cmdList) == 6 {
+		cmd, err := exec.Command(cmdList[0], cmdList[1], cmdList[2], cmdList[3], cmdList[4], cmdList[5]).Output()
+		if err != nil {
+			log.Fatalf("Failed to execute commands: %v\n", err)
+			return false
+		}
+		log.Printf("Deployment Result: {%s}\n", cmd)
+	} else {
+
+		grep := exec.Command(grepList[0], grepList[1])
+        kube := exec.Command(cmdList[0], cmdList[1], cmdList[2], cmdList[3])
+
+        // Get ps's stdout and attach it to grep's stdin.
+        pipe, _ := kube.StdoutPipe()
+        defer pipe.Close()
+
+        grep.Stdin = pipe
+
+        // Run ps first.
+        kube.Start()
+
+        // Run and get the output of grep.
+        res, _ := grep.Output()
+
+		log.Printf("Result: {%s}\n", string(res))
+		
+		if len(string(res)) != 0 {
+			log.Printf("Deployment already installed: {monitoring}\n")
+		} else {
+			cmd1, err1 := exec.Command("helm", "install", "prometheus", "prometheus-community/kube-prometheus-stack", "-n", "arcsight-installer-9qe5i").Output()
+			if err1 != nil {
+				log.Fatalf("Failed to execute commands: %v\n", err1)
+				return false
+			}
+			log.Printf("Deployment Result: {%s}\n", cmd1)
+		}
+	}
+	return true
 }
