@@ -108,20 +108,38 @@ func installProducts(products []string) (bool, error) {
 	for _, p := range products {
 		if p == "fusion" {
 			cmd = "helm install fusion fusion-helm-chart/. -n $(kubectl get namespaces | grep arcsight | cut -d ' ' -f1)"
-			directDeploy, err := helmInstall(cmd)
-			if err != nil {
-				log.Fatalf("Failed to execute commands: %v %v\n", cmd, err)
-				return false, err
+			installCheck, err1 := checkInstalled(p)
+			if err1 != nil {
+				log.Fatalf("Failed to execute commands: %v\n", err1)
+				return false, err1
 			}
-			installed = directDeploy
+			if !installCheck {
+				directDeploy, err := helmInstall(cmd)
+				if err != nil {
+					log.Fatalf("Failed to execute commands: %v %v\n", cmd, err)
+					return false, err
+				}
+				installed = directDeploy
+			} else {
+				return true, nil
+			}
 		} else if p == "recon" {
 			cmd = "helm install recon recon-helm-chart/. -n $(kubectl get namespaces | grep arcsight | cut -d ' ' -f1)"
-			directDeploy, err := helmInstall(cmd)
-			if err != nil {
-				log.Fatalf("Failed to execute commands: %v %v\n", cmd, err)
-				return false, err
+			installCheck, err1 := checkInstalled(p)
+			if err1 != nil {
+				log.Fatalf("Failed to execute commands: %v\n", err1)
+				return false, err1
 			}
-			installed = directDeploy
+			if !installCheck {
+				directDeploy, err := helmInstall(cmd)
+				if err != nil {
+					log.Fatalf("Failed to execute commands: %v %v\n", cmd, err)
+					return false, err
+				}
+				installed = directDeploy
+			} else {
+				return true, nil
+			}
 		} else if p == "prometheus" {
 			cmd = "helm install prometheus prometheus-community/kube-prometheus-stack -n $(kubectl get namespaces | grep arcsight | cut -d ' ' -f1)"
 			installCheck, err1 := checkInstalled(p)
